@@ -1,0 +1,112 @@
+1.
+root@poks-09:/home/uporabnik/poks/vaja07/hello1# insmod hello.ko 
+root@poks-09:/home/uporabnik/poks/vaja07/hello1# lsmod | grep hello
+hello                  12288  0
+root@poks-09:/home/uporabnik/poks/vaja07/hello1# modinfo hello.ko
+filename:       /home/uporabnik/poks/vaja07/hello1/hello.ko
+version:        1.0
+description:    Hello world kernel modul
+author:         Anze Pintar
+license:        GPL
+srcversion:     76AF46D6721DC43F30E6B07
+depends:        
+name:           hello
+retpoline:      Y
+vermagic:       7.0.0-42-generic SMP preempt mod_unload modversions 
+root@poks-09:/home/uporabnik/poks/vaja07/hello1# rmmod hello
+root@poks-09:/home/uporabnik/poks/vaja07/hello1# 
+
+
+
+uporabnik@poks-09:~/poks/vaja07/chardev2$ sudo tail -f /var/log/kern.log | grep --line-buffered -v UFW
+2026-11-23T13:31:38.139203+00:00 poks-09 kernel: Hello, world 4
+2026-11-23T13:32:17.978225+00:00 poks-09 kernel: Goodbye, world 4
+
+
+
+
+
+2.
+uporabnik@poks-09:~/poks/vaja07/chardev2$ sudo insmod chardev.ko 
+uporabnik@poks-09:~/poks/vaja07/chardev2$ mknod /cev/chardev2 c 240 0
+mknod: No such file or directory (os error 2)
+uporabnik@poks-09:~/poks/vaja07/chardev2$ mknod /dev/chardev2 c 240 0
+mknod: Permission denied (os error 13)
+uporabnik@poks-09:~/poks/vaja07/chardev2$ sudo mknod /dev/chardev2 c 240 0
+uporabnik@poks-09:~/poks/vaja07/chardev2$ cat /dev/chardev2 
+Text from KERNEL
+Text from KERNEL
+uporabnik@poks-09:~/poks/vaja07/chardev2$ sudo echo MojText >/dev/chardev2 
+uporabnik@poks-09:~/poks/vaja07/chardev2$ sudo su
+root@poks-09:/home/uporabnik/poks/vaja07/chardev2# echo Mojtext > /dev/chardev2
+root@poks-09:/home/uporabnik/poks/vaja07/chardev2# echo "testestesteste" > /dev/chardev2
+root@poks-09:/home/uporabnik/poks/vaja07/chardev2# cat /dev/chardev2 
+Text from KERNEL
+Text from KERNEL
+root@poks-09:/home/uporabnik/poks/vaja07/chardev2# rmmod chardev
+root@poks-09:/home/uporabnik/poks/vaja07/chardev2# rm /dev/chardev2 
+
+uporabnik@poks-09:~/poks/vaja07/chardev2$ sudo tail -f /var/log/kern.log      # (ali: sudo dmesg -w)
+2026-11-23T13:17:09.392234+00:00 poks-09 kernel: 
+2026-11-23T13:17:09.392273+00:00 poks-09 kernel: I was assigned major number 240 
+2026-11-23T13:17:09.392277+00:00 poks-09 kernel: To talk to the driver, create a dev file with
+2026-11-23T13:17:09.392280+00:00 poks-09 kernel: 'mknod /dev/chardev2 c 240 0'.
+2026-11-23T13:17:09.392283+00:00 poks-09 kernel: Try to cat and echo to the device file.
+2026-11-23T13:17:09.392284+00:00 poks-09 kernel: Remove the device file and module when done.
+2026-11-23T13:18:08.849283+00:00 poks-09 kernel: device_open Major=240
+2026-11-23T13:18:08.849323+00:00 poks-09 kernel: device_read. Text from KERNEL
+2026-11-23T13:18:08.849326+00:00 poks-09 kernel: device_read. Text from KERNEL
+2026-11-23T13:18:08.853996+00:00 poks-09 kernel: device_read bytes_read=0
+2026-11-23T13:18:08.854259+00:00 poks-09 kernel: device_release Major=240
+2026-11-23T13:18:47.831253+00:00 poks-09 kernel: device_open Major=240
+2026-11-23T13:18:47.831302+00:00 poks-09 kernel: device_write. Mojtext
+2026-11-23T13:18:47.831306+00:00 poks-09 kernel: 
+2026-11-23T13:18:47.831309+00:00 poks-09 kernel: device_release Major=240
+2026-11-23T13:18:59.110230+00:00 poks-09 kernel: device_open Major=240
+2026-11-23T13:18:59.110269+00:00 poks-09 kernel: device_write. testestesteste
+2026-11-23T13:18:59.110273+00:00 poks-09 kernel: 
+2026-11-23T13:18:59.110276+00:00 poks-09 kernel: device_release Major=240
+2026-11-23T13:21:27.156254+00:00 poks-09 kernel: device_open Major=240
+2026-11-23T13:21:27.156301+00:00 poks-09 kernel: device_read. Text from KERNEL
+2026-11-23T13:21:27.156306+00:00 poks-09 kernel: device_read. Text from KERNEL
+2026-11-23T13:21:27.156315+00:00 poks-09 kernel: device_read bytes_read=0
+2026-11-23T13:21:27.156317+00:00 poks-09 kernel: device_release Major=240
+2026-11-23T13:27:47.286298+00:00 poks-09 kernel: device_release Major=240
+2026-11-23T13:28:44.168507+00:00 poks-09 kernel: Goodbye Major=240
+
+
+
+
+3.
+
+uporabnik@poks-09:~/poks/vaja07$ sudo su
+root@poks-09:/home/uporabnik/poks/vaja07# sudo insmod chardev2/chardev.ko 
+root@poks-09:/home/uporabnik/poks/vaja07# sudo mknod /dev/chardev3 c 240 0
+root@poks-09:/home/uporabnik/poks/vaja07# gcc -o program3/program3 program3/program3.c 
+root@poks-09:/home/uporabnik/poks/vaja07# cd program3/
+root@poks-09:/home/uporabnik/poks/vaja07/program3# ./program3 
+Open device file: /dev/chardev3
+Read from kernel modul : Text from KERNEL
+ 
+Write to kernel modul: Text from Application
+ 
+Close device file: /dev/chardev3
+root@poks-09:/home/uporabnik/poks/vaja07/program3# 
+
+
+
+uporabnik@poks-09:~/poks/vaja07/program3$ sudo tail -f /var/log/kern.log | grep --line-buffered -v UFW
+2026-11-23T13:32:17.978225+00:00 poks-09 kernel: Goodbye, world 4
+2026-11-23T13:35:50.229284+00:00 poks-09 kernel: 
+2026-11-23T13:35:50.229325+00:00 poks-09 kernel: I was assigned major number 240 
+2026-11-23T13:35:50.229393+00:00 poks-09 kernel: To talk to the driver, create a dev file with
+2026-11-23T13:35:50.229399+00:00 poks-09 kernel: 'mknod /dev/chardev2 c 240 0'.
+2026-11-23T13:35:50.229400+00:00 poks-09 kernel: Try to cat and echo to the device file.
+2026-11-23T13:35:50.229403+00:00 poks-09 kernel: Remove the device file and module when done.
+2026-11-23T13:36:48.261263+00:00 poks-09 kernel: device_open Major=240
+2026-11-23T13:36:48.261310+00:00 poks-09 kernel: device_read. Text from KERNEL
+2026-11-23T13:36:48.261314+00:00 poks-09 kernel: device_write. Text from Application
+2026-11-23T13:36:48.261318+00:00 poks-09 kernel: 
+2026-11-23T13:36:49.261385+00:00 poks-09 kernel: device_release Major=240
+
+
